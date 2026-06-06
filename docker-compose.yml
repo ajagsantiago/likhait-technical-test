@@ -51,6 +51,13 @@ services:
     volumes:
       - ./backend:/rails
       - backend_gems:/usr/local/bundle
+    command: >
+      sh -c "
+        bundle install &&
+        ./bin/rails db:migrate &&
+        ./bin/rails db:seed &&
+        ./bin/rails server -b 0.0.0.0
+      "
     networks:
       - expense_network
 
