@@ -3,10 +3,11 @@ require 'rails_helper'
 RSpec.describe "Api::Expenses", type: :request do
   let!(:food_category) { Category.create!(name: "Food") }
   let!(:transport_category) { Category.create!(name: "Transport") }
+  let!(:entertainment_category) { Category.create!(name: "Entertainment") }
 
   describe "GET /api/expenses" do
-  let!(:expense1) { Expense.create!(description: "Lunch", amount: 100.00, category: food_category, date: Date.today) }
-  let!(:expense2) { Expense.create!(description: "Taxi", amount: 50.00, category: transport_category, date: Date.today) }
+  let!(:expense1) { Expense.create!(description: "Lunch", amount: 100.00, category: food_category, date: 2.days.ago) }
+  let!(:expense2) { Expense.create!(description: "Taxi", amount: 50.00, category: transport_category, date: 1.day.ago) }
 
     it "returns all expenses with category information" do
       get "/api/expenses"
@@ -16,11 +17,22 @@ RSpec.describe "Api::Expenses", type: :request do
       expect(json.length).to eq(2)
     end
 
-    it "returns expenses in descending order by created_at" do
+    it "returns expenses in descending order by date then id" do
+
+      # Newly created expense but assigned a past date 
+      backdated_expense = Expense.create!(
+        description: "007 First Light",
+        amount: 59.99,
+        category: entertainment_category,
+        date: 2.days.ago
+      )
+
       get "/api/expenses"
 
       json = JSON.parse(response.body)
+      puts json
       expect(json.first["id"]).to eq(expense2.id)
+      expect(json.second["id"]).to eq(backdated_expense.id)
       expect(json.last["id"]).to eq(expense1.id)
     end
   end
@@ -46,7 +58,7 @@ RSpec.describe "Api::Expenses", type: :request do
         expect(response).to have_http_status(:created)
         json = JSON.parse(response.body)
         expect(json["description"]).to eq("Team Lunch")
-        expect(json["amount"]).to eq("150.5")
+        expect(json["amount"]).to eq(150.50)
       end
     end
 
