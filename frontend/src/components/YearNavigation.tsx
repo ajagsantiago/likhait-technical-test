@@ -4,11 +4,13 @@ import { COLORS } from "../constants/colors";
 interface YearNavigationProps {
   currentYear: number;
   onYearChange: (year: number) => void;
+  minYear: number;
 }
 
 export function YearNavigation({
   currentYear,
   onYearChange,
+  minYear,
 }: YearNavigationProps) {
   const containerStyle: React.CSSProperties = {
     display: "flex",
@@ -29,6 +31,15 @@ export function YearNavigation({
     fontSize: "18px",
     color: COLORS.secondary.s08,
     transition: "all 0.2s",
+    
+  };
+
+  const disabledButtonStyle: React.CSSProperties = {
+    ...buttonStyle,
+    cursor: "auto",
+    opacity: 0.5,
+    color: COLORS.secondary.s04,
+    border: `1px solid ${COLORS.secondary.s03}`,
   };
 
   const yearStyle: React.CSSProperties = {
@@ -39,11 +50,16 @@ export function YearNavigation({
     textAlign: "center",
   };
 
+  const maxYear = new Date().getFullYear();
+  const isLeftDisabled = currentYear <= minYear;
+  const isRightDisabled = currentYear >= maxYear;
+
   return (
     <div style={containerStyle}>
       <button
-        style={buttonStyle}
-        onClick={() => onYearChange(currentYear - 1)}
+        style={isLeftDisabled ? disabledButtonStyle : buttonStyle}
+        onClick={() => !isLeftDisabled && onYearChange(currentYear - 1)}
+        disabled={isLeftDisabled}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = COLORS.secondary.s02;
           e.currentTarget.style.borderColor = COLORS.secondary.s05;
@@ -57,8 +73,9 @@ export function YearNavigation({
       </button>
       <div style={yearStyle}>{currentYear}</div>
       <button
-        style={buttonStyle}
-        onClick={() => onYearChange(currentYear + 1)}
+        style={isRightDisabled ? disabledButtonStyle : buttonStyle}
+        onClick={() => !isRightDisabled && onYearChange(currentYear + 1)}
+        disabled={isRightDisabled}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = COLORS.secondary.s02;
           e.currentTarget.style.borderColor = COLORS.secondary.s05;

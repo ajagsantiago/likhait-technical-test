@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getExpenses, createExpense } from "../services/api";
+import { getExpenses, createExpense, fetchExpenses as getAllExpenses } from "../services/api";
 import { Expense, ExpenseFormData } from "../types";
 import YearNavigation from "../components/YearNavigation";
 import { MonthNavigation } from "../components/MonthNavigation";
@@ -11,6 +11,7 @@ import { COLORS } from "../constants/colors";
 
 const HistoryPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [oldestExpenseYear, setOldestExpenseYear] = useState<number>(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -49,6 +50,10 @@ const HistoryPage: React.FC = () => {
     fetchExpenses();
   }, [selectedYear, selectedMonth]);
 
+  useEffect(() => {
+    getOldestExpenseYear();
+  }, []);
+
   const fetchExpenses = async () => {
     try {
       setLoading(true);
@@ -58,6 +63,29 @@ const HistoryPage: React.FC = () => {
       console.error("Error fetching expenses:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getOldestExpenseYear = async () => {
+    try {
+      // Fetch expenses from API
+      const data = await getAllExpenses(); // returns Expense[]
+      setExpenses(data);
+
+      if (data.length === 0) {
+        setOldestExpenseYear(new Date().getFullYear());
+        return;
+      }
+
+      // Find the oldest expense
+      const oldestExpense = data.reduce((oldest, current) => {
+        return new Date(current.date) < new Date(oldest.date) ? current : oldest;
+      }, data[0]);
+
+      setOldestExpenseYear(new Date(oldestExpense.date).getFullYear());
+    } catch (error) {
+      console.error("Failed to get oldest expense year:", error);
+      setOldestExpenseYear(new Date().getFullYear());
     }
   };
 
@@ -146,6 +174,7 @@ const HistoryPage: React.FC = () => {
           <YearNavigation
             currentYear={selectedYear}
             onYearChange={handleYearChange}
+            minYear={oldestExpenseYear}
           />
         </div>
         <Button variant="primary" onClick={() => setIsModalOpen(true)}>
