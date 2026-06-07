@@ -13,7 +13,6 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test:
         [
@@ -55,9 +54,9 @@ services:
     command: >
       sh -c "
         bundle install &&
-        rails db:migrate &&
-        rails db:seed &&
-        rails server -b 0.0.0.0
+        ./bin/rails db:migrate &&
+        ./bin/rails db:seed &&
+        ./bin/rails server -b 0.0.0.0
       "
     networks:
       - expense_network
@@ -69,6 +68,8 @@ services:
     container_name: expense_system_frontend
     environment:
       VITE_API_URL: http://localhost:3000
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     ports:
       - "5173:5173"
     depends_on:
@@ -76,7 +77,7 @@ services:
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
-    command: npm run dev -- --host
+    command: sh -c "npm install && npm run dev -- --host"
     networks:
       - expense_network
 
