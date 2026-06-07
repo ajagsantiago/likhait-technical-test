@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getExpenses, createExpense, fetchCategories, createCategory } from "../services/api";
-import { Expense, ExpenseFormData, Category, CategoryFormData } from "../types";
+import { Expense, ExpenseFormData, CategoryFormData } from "../types";
 import YearNavigation from "../components/YearNavigation";
 import { MonthNavigation } from "../components/MonthNavigation";
 import CategoryBreakdown from "../components/CategoryBreakdown";
@@ -12,7 +12,6 @@ import { COLORS } from "../constants/colors";
 
 const HistoryPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
