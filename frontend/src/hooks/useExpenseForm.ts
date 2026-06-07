@@ -24,6 +24,19 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
 
   const handleChange = (field: keyof ExpenseFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+    if (field === "date") {
+      const today = formatDate(new Date());
+
+      if (value > today) {
+        setErrors((prev) => ({
+          ...prev,
+          date: "Future dates are not allowed",
+        }));
+        return;
+      }
+    }
+
     // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -32,6 +45,7 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
 
   const validateForm = (): boolean => {
     const newErrors: Partial<ExpenseFormData> = {};
+    const today = formatDate(new Date());
 
     if (!formData.amount || Number(formData.amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
@@ -47,6 +61,8 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
 
     if (!formData.date) {
       newErrors.date = "Date is required";
+    } else if (formData.date > today) {
+      newErrors.date = "Future dates are not allowed";
     }
 
     setErrors(newErrors);
